@@ -1,5 +1,8 @@
-import{world,system}from "@minecraft/server";
-export function initStorage(v){if(v.getDynamicProperty("villagers_plus:storage")===undefined)v.setDynamicProperty("villagers_plus:storage","")}
-export function store(v,item,amount){initStorage(v);const raw=String(v.getDynamicProperty("villagers_plus:storage")??"");let data={};try{data=JSON.parse(raw||"{}")}catch{};data[item]=(data[item]??0)+amount;v.setDynamicProperty("villagers_plus:storage",JSON.stringify(data))}
-export function getStorage(v){let data={};try{data=JSON.parse(String(v.getDynamicProperty("villagers_plus:storage")??"{}"))}catch{data={}}return data}
+import{world,system,ItemStack}from "@minecraft/server";
+const KEY="villagers_plus:storage";
+export function initStorage(v){if(v.getDynamicProperty(KEY)===undefined)v.setDynamicProperty(KEY,"{}")}
+export function getStorage(v){let data={};try{data=JSON.parse(String(v.getDynamicProperty(KEY)??"{}"))}catch{};return data}
+export function store(v,item,amount){const data=getStorage(v);data[item]=(Number(data[item])||0)+amount;v.setDynamicProperty(KEY,JSON.stringify(data));}
+export function collectStorage(v,p){const data=getStorage(v),c=p.getComponent("minecraft:inventory")?.container;if(!c)return 0;let moved=0;for(const [id,value] of Object.entries(data)){let left=Math.max(0,Math.floor(Number(value)||0));while(left>0){const n=Math.min(64,left);const remainder=c.addItem(new ItemStack(id,n));if(remainder){const accepted=n-remainder.amount;moved+=accepted;left-=accepted;if(accepted<=0)break}else{moved+=n;left-=n}}data[id]=left;if(left<=0)delete data[id]}v.setDynamicProperty(KEY,JSON.stringify(data));return moved}
+export function storageSummary(v){const data=getStorage(v);const entries=Object.entries(data).filter(([,n])=>Number(n)>0);if(!entries.length)return "Estoque vazio.";return entries.map(([id,n])=>id.replace("minecraft:","")+" x"+n).join("\n")}
 system.runInterval(()=>{for(const d of [world.getDimension("overworld"),world.getDimension("nether"),world.getDimension("the_end")])for(const v of d.getEntities({tags:["villagers_plus"]}))initStorage(v)},200);
