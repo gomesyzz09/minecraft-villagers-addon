@@ -1,0 +1,1 @@
+tellraw @s {"rawtext":[{"text":"§aVillagers+ §7— Use uma bússola para abrir o menu de aldeões."}]}
