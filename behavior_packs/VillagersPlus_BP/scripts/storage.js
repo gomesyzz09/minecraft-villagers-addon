@@ -1,0 +1,5 @@
+import{world,system}from "@minecraft/server";
+export function initStorage(v){if(v.getDynamicProperty("villagers_plus:storage")===undefined)v.setDynamicProperty("villagers_plus:storage","")}
+export function store(v,item,amount){initStorage(v);const raw=String(v.getDynamicProperty("villagers_plus:storage")??"");let data={};try{data=JSON.parse(raw||"{}")}catch{};data[item]=(data[item]??0)+amount;v.setDynamicProperty("villagers_plus:storage",JSON.stringify(data))}
+export function getStorage(v){let data={};try{data=JSON.parse(String(v.getDynamicProperty("villagers_plus:storage")??"{}"))}catch{data={}}return data}
+system.runInterval(()=>{for(const d of [world.getDimension("overworld"),world.getDimension("nether"),world.getDimension("the_end")])for(const v of d.getEntities({tags:["villagers_plus"]}))initStorage(v)},200);
