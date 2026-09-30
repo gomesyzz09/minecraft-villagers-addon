@@ -1,4 +1,4 @@
-import{world}from "@minecraft/server";
+import{world,system,ItemStack}from "@minecraft/server";
 import{ActionFormData,ModalFormData}from "@minecraft/server-ui";
 import{jobs}from "./jobs.js";
 import{getVillageInfo,countWorkers,ensureVillageOrigin,buildVillage,getBuiltLevel,getWorkLocation}from "./village.js";
@@ -13,4 +13,15 @@ function nearbyWorkers(p){return p.dimension.getEntities({location:p.location,ma
 function nameMenu(p){const list=nearbyWorkers(p);const v=list[0];if(!v){p.sendMessage("§cNenhum trabalhador seu está próximo.");return}new ModalFormData().title("Nomear trabalhador").textField("Nome","Ex.: João","Aldeão").show(p).then(r=>{if(!r.canceled)rename(v,String(r.formValues?.[0]??"Aldeão").trim().slice(0,24)||"Aldeão")})}
 function storageMenu(p){const list=nearbyWorkers(p);if(!list.length){p.sendMessage("§cNenhum trabalhador seu está próximo.");return}const f=new ActionFormData().title("📦 Estoque dos trabalhadores").body("Escolha um trabalhador para ver e recolher o estoque.");for(const v of list.slice(0,20)){const n=String(v.getDynamicProperty("villagers_plus:name")??"Aldeão");f.button("📦 "+n+"\n"+storageSummary(v).slice(0,80));}f.show(p).then(r=>{if(r.canceled||r.selection===undefined)return;const v=list[r.selection];const before=storageSummary(v);const moved=collectStorage(v,p);p.sendMessage(moved>0?"§aVocê recolheu "+moved+" item(ns) do estoque.":"§eNão foi possível recolher itens agora.");p.sendMessage("§7Estoque restante: "+storageSummary(v));})}
 function villageMenu(p){const i=getVillageInfo(p),w=countWorkers(p),built=getBuiltLevel(p);const next=i.next?(i.next.name+" ("+i.next.xp+" XP)"):"Nível máximo";const f=new ActionFormData().title("🏘️ Evolução da Vila").body("Nível "+i.level+" — "+i.name+"\nXP: "+i.xp+"\nPróximo: "+next+"\nDesbloqueio: "+i.unlock+"\nTrabalhadores: "+w+"\nConstruído até: nível "+built);f.button("🏗️ Construir/atualizar vila");f.button("📦 Estoque dos trabalhadores");f.button("👷 Contratar trabalhador");f.button("Fechar");f.show(p).then(r=>{if(r.canceled)return;if(r.selection===0){buildVillage(p,i.level)}if(r.selection===1)storageMenu(p);if(r.selection===2)jobMenu(p)})}
+
+function setupPlayer(p){
+  if(p.getDynamicProperty("villagers_plus:started")===true)return;
+  p.setDynamicProperty("villagers_plus:started",true);
+  ensureVillageOrigin(p);
+  try{p.getComponent("minecraft:inventory")?.container?.addItem(new ItemStack("minecraft:compass",1));}catch{}
+  try{create(p,"farmer");}catch(err){p.sendMessage("§cVillagers+: não foi possível criar o trabalhador inicial.");}
+  p.sendMessage("§6🏘️ Villagers+ ativado! §fUse a bússola para abrir o menu da vila.");
+}
+world.afterEvents.playerSpawn.subscribe(e=>{if(e.initialSpawn)system.runTimeout(()=>setupPlayer(e.player),20)});
+
 world.afterEvents.itemUse.subscribe(e=>{if(e.itemStack?.typeId!=="minecraft:compass")return;const p=e.source;ensureVillageOrigin(p);const f=new ActionFormData().title("Villagers+ V5").body("Sua vila agora constrói prédios, desbloqueia profissões e gerencia estoques.");f.button("👷 Contratar trabalhador");f.button("✏️ Dar nome");f.button("🏘️ Evolução e construções");f.button("📦 Recolher estoque");f.show(p).then(r=>{if(r.canceled)return;if(r.selection===0)jobMenu(p);if(r.selection===1)nameMenu(p);if(r.selection===2)villageMenu(p);if(r.selection===3)storageMenu(p)})});
