@@ -1,24 +1,59 @@
-# Villagers+ V4 — Sistema de Vila
-
-A vila possui XP próprio por jogador.
-
-Níveis:
-1 Acampamento — 0
-2 Povoado — 100
-3 Vila — 300
-4 Vila Desenvolvida — 700
-5 Grande Vila — 1500
-6 Cidade — 3000
-
-## Rotina
-- 08:00–18:00: trabalho.
-- Fora desse horário: estado de descanso.
-- O trabalhador tem coordenadas de casa.
-- O trabalhador recebe XP ao produzir.
-- A vila recebe XP quando seus trabalhadores produzem.
+# Sistema de Vila — Villagers+ V5
 
 ## Evolução
-Quanto mais a vila trabalha, maior seu nível. A V4 já possui a estrutura para liberar bônus, novas construções e novas profissões por nível.
+
+A vila recebe XP quando os trabalhadores produzem itens.
+
+- 0 XP: Acampamento
+- 100 XP: Povoado
+- 300 XP: Vila
+- 700 XP: Vila Desenvolvida
+- 1500 XP: Grande Vila
+- 3000 XP: Cidade
+
+## Construções
+
+Cada nível adiciona uma camada de construções:
+
+### Nível 1
+- Casas básicas
+- Área central
+
+### Nível 2
+- Fazenda
+- Celeiro
+
+### Nível 3
+- Mercado
+- Biblioteca
+
+### Nível 4
+- Oficina
+- Forja
+
+### Nível 5
+- Muralhas
+- Torres
+- Santuário
+
+### Nível 6
+- Prefeitura
+- Área de mineração
+
+## Profissões
+
+Algumas profissões exigem níveis maiores da vila. Isso faz a evolução ter efeito direto sobre o que pode ser contratado.
 
 ## Estoque
-Cada trabalhador possui uma propriedade de estoque para guardar recursos produzidos. O inventário do jogador continua recebendo a entrega automática quando há espaço.
+
+Quando o inventário do jogador não consegue receber toda a produção, o restante fica armazenado no próprio trabalhador. O menu Villagers+ permite recolher esse estoque depois.
+
+## Rotina
+
+- 08:00–18:00: trabalhador em atividade.
+- Fora desse período: estado de descanso.
+- O trabalhador usa a origem da vila para definir casa e locais de trabalho.
+
+## Limitação intencional
+
+O sistema simula deslocamento por pontos de trabalho. Ele não substitui o pathfinding nativo completo de aldeões.
